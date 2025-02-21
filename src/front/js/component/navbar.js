@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 
 export const Navbar = () => {
 	const {store} = useContext(Context)
+	console.log(store.auth);
+	
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container">
@@ -12,7 +14,7 @@ export const Navbar = () => {
 				</Link>
 				<div className="ml-auto">
 					{store.auth ? <Link to="/demo">
-						<button className="btn btn-primary">Check the Context in action</button>
+						<button className="btn btn-primary">Logout</button>
 					</Link>:null}
 				</div>
 			</div>
