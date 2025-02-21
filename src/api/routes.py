@@ -5,7 +5,9 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Favorite
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, verify_jwt_in_request
+from sqlalchemy.exc import NoResultFound
+from flask_jwt_extended.exceptions import NoAuthorizationError
 
 api = Blueprint('api', __name__)
 
@@ -61,3 +63,12 @@ def protected():
     print(results)
     return jsonify({"results": results}), 200
 
+
+@api.route("/verify-token", methods=["GET"])
+def verify_token():
+    try:
+        verify_jwt_in_request()
+        identify = get_jwt_identity()
+        return jsonify({"valid": True, "user": identify}), 200
+    except NoAuthorizationError:
+        return jsonify({"valid": False, "message": "Token invalido o no proporcionado"})

@@ -41,7 +41,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const result = await response.json();
 					if (response.status === 200) {
 						localStorage.setItem("token", result.access_token)
-						
+
 						return true
 					}
 
@@ -69,15 +69,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 			verifyToken: async () => {
 				let token = localStorage.getItem("token")
-				try {
-					const response = await fetch("https://cautious-xylophone-r4r546xv7rr4c5p59-3001.app.github.dev/api/favorite", {
-						method: "GET",
-						headers: {
-							"Authorization": `Bearer ${token}`
-						},
-					});
-					const result = await response.json();
+				const myHeaders = new Headers();
+				myHeaders.append("Authorization", `Bearer ${token}`);
+				
+				const requestOptions = {
+					method: "GET",
+					headers: myHeaders,
+					redirect: "follow"
+				};
 
+				try {
+					const response = await fetch("https://cautious-xylophone-r4r546xv7rr4c5p59-3001.app.github.dev/api/verify-token", requestOptions);
+					const result = await response.json();
+					console.log(result)
 					if (response.status !== 200) {
 						setStore({auth:result.valid})
 					}
