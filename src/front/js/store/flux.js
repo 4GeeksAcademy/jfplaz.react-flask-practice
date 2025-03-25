@@ -37,11 +37,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 
 				try {
-					const response = await fetch("https://cautious-xylophone-r4r546xv7rr4c5p59-3001.app.github.dev/api/login", requestOptions);
+					const response = await fetch(process.env.BACKEND_URL + "/api/login", requestOptions);
 					const result = await response.json();
 					if (response.status === 200) {
 						localStorage.setItem("token", result.access_token)
-
+						window.location.reload();
 						return true
 					}
 
@@ -54,7 +54,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getFavorite: async () => {
 				let token = localStorage.getItem("token")
 				try {
-					const response = await fetch("https://cautious-xylophone-r4r546xv7rr4c5p59-3001.app.github.dev/api/favorite", {
+					const response = await fetch(process.env.BACKEND_URL + "/api/favorite", {
 						method: "GET",
 						headers: {
 							"Authorization": `Bearer ${token}`
@@ -71,7 +71,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				let token = localStorage.getItem("token")
 				const myHeaders = new Headers();
 				myHeaders.append("Authorization", `Bearer ${token}`);
-				
+
 				const requestOptions = {
 					method: "GET",
 					headers: myHeaders,
@@ -79,47 +79,51 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 
 				try {
-					const response = await fetch("https://cautious-xylophone-r4r546xv7rr4c5p59-3001.app.github.dev/api/verify-token", requestOptions);
+					const response = await fetch(process.env.BACKEND_URL + "/api/verify-token", requestOptions);
 					const result = await response.json();
 					console.log(result)
 					if (response.status !== 200) {
-						setStore({auth:result.valid})
+						setStore({ auth: result.valid })
 					}
-					setStore({auth:result.valid})
+					setStore({ auth: result.valid })
 				} catch (error) {
 					console.error(error);
 				};
 			},
 
-		},
-		logout: () => {
-			//borrar el token del localStorage
-		},
-		getMessage: async () => {
-			try {
-				// fetching data from the backend
-				const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-				const data = await resp.json()
-				setStore({ message: data.message })
-				// don't forget to return something, that is how the async resolves
-				return data;
-			} catch (error) {
-				console.log("Error loading message from backend", error)
+
+			logout: (navigate) => {
+				localStorage.removeItem("token"); // 🗑️ Borrar el token
+				setStore({ token: null, isAuthenticated: false });
+				navigate("/"); // 🔄 Redirige a "/"
+			  
+			},
+			getMessage: async () => {
+				try {
+					// fetching data from the backend
+					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
+					const data = await resp.json()
+					setStore({ message: data.message })
+					// don't forget to return something, that is how the async resolves
+					return data;
+				} catch (error) {
+					console.log("Error loading message from backend", error)
+				}
+			},
+			changeColor: (index, color) => {
+				//get the store
+				const store = getStore();
+
+				//we have to loop the entire demo array to look for the respective index
+				//and change its color
+				const demo = store.demo.map((elm, i) => {
+					if (i === index) elm.background = color;
+					return elm;
+				});
+
+				//reset the global store
+				setStore({ demo: demo });
 			}
-		},
-		changeColor: (index, color) => {
-			//get the store
-			const store = getStore();
-
-			//we have to loop the entire demo array to look for the respective index
-			//and change its color
-			const demo = store.demo.map((elm, i) => {
-				if (i === index) elm.background = color;
-				return elm;
-			});
-
-			//reset the global store
-			setStore({ demo: demo });
 		}
 	}
 };
